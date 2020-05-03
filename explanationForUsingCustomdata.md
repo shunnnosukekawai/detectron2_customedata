@@ -202,4 +202,5 @@ inference_on_dataset(trainer.model, val_loader, evaluator)
 # another equivalent way is to use trainer.test
 ```
 AP50's score was the best
+
 <img src="images/model_accuracy.png" width=400>  
