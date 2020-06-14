@@ -1,11 +1,13 @@
 Explanation for using custom datasets
 ====
-Used google colab, the free datasets:[FUNSD](https://guillaumejaume.github.io/FUNSD/)  and [model trained on PubLayNet dataset](https://github.com/hpanwar08/detectron2)   
-Reference:  
-[official documentation](https://detectron2.readthedocs.io/tutorials/datasets.html)  , [good article](https://towardsdatascience.com/face-detection-on-custom-dataset-with-detectron2-and-pytorch-using-python-23c17e99e162)
-, [official tutorial](https://colab.research.google.com/drive/16jcaJoc6bCFAQ96jDe2HwtXj7BMD_-m5#scrollTo=PIbAM2pv-urF)
+I used Google Colab, the free dataset [FUNSD](https://guillaumejaume.github.io/FUNSD/), and [model trained on PubLayNet dataset](https://github.com/hpanwar08/detectron2).
 
-## Check the free datasets structure in FUNSD
+Reference:  
+・[Official documentation](https://detectron2.readthedocs.io/tutorials/datasets.html)      
+・[Explicative article](https://towardsdatascience.com/face-detection-on-custom-dataset-with-detectron2-and-pytorch-using-python-23c17e99e162)           
+・[Official tutorial](https://colab.research.google.com/drive/16jcaJoc6bCFAQ96jDe2HwtXj7BMD_-m5#scrollTo=PIbAM2pv-urF)
+
+## Free datasets structure in FUNSD check
 <img src="images/FUNSD/original_datasetsform.png" width=400>  
 
 * Explanation of json keys  
@@ -18,10 +20,10 @@ Reference:
 semantic entity identifier
  * id: id of the box　　
 
- You can check the detail in [the pdf](https://arxiv.org/pdf/1905.13538.pdf).
+ The details can be checked in [the pdf](https://arxiv.org/pdf/1905.13538.pdf).
 
 
-## Make the function to tranform the datasets to standard datasets format
+## Making the function to transform the datasets to standard datasets format
 
 
 ```
@@ -90,16 +92,16 @@ def get_data_dicts(img_dir):
 
 * Explanation of the keys
  * file_name: the full path to the image file
- * image_id: a unique id that identifies this image
- * height, width: the shape of image
- * annotations: each dict corresponds to annotations of one instance in this image  
-   * bbox: list of 4 numbers representing the bounding box of the instance
-   * category_id: an integer in the range [0, num_categories) representing the category label.
-     category_id corresponds to {'answer': 0, 'header': 1, 'question': 2, 'other': 3}
-   * bbox_mode: the format of bbox  
-     I chose BoxMode.XYXY_ABS because my box represents (x0, y0, x1, y1)
-   * segmentation: it represents a list of polygon.
-     I made a segmentation which represents the box corners [(xmin, ymin), (xmax, ymin),(xmax, ymax), (xmin, ymax)]
+ * image_id: a unique id that identifies the image
+ * height, width: the shape of the image
+ * annotations: each dict corresponds to annotations of one instance in the image  
+   * bbox: list of 4 numbers representing the bounding box of the instance;
+   * category_id: an integer in the range [0, num_categories) representing the category label:
+     category_id corresponds to {'answer': 0, 'header': 1, 'question': 2, 'other': 3};
+   * bbox_mode: the format of bbox.  
+     In this case, BoxMode.XYXY_ABS was chosen because the box represents (x0, y0, x1, y1);
+   * segmentation: a list of polygons.
+     This segmentation represents the box corners [(xmin, ymin), (xmax, ymin),(xmax, ymax), (xmin, ymax)].
 
 ## How to register the function
 ```
@@ -112,7 +114,7 @@ data_metadata = MetadataCatalog.get("data_train_data")
 ```
 
 `DatasetCatalog.register("data_" + d, lambda d=d: get_data_dicts(d))`  
-This code registers the function (get_data_dicts()) with the name (data_training_data or data_testing_data).
+This code registers the function (get_data_dicts) with the name (data_training_data or data_testing_data).
 
 `MetadataCatalog.get("data_" + d).set(thing_classes=['answer', 'header', 'question', 'other'])`
 This code registers the list of names for each category_id.
@@ -136,7 +138,7 @@ I set the data_metadata valid in Visualizer
 <img src="images/FUNSD/input_sample.jpg" width=400>  
 
 
-## Fine-tune a model trained on PubLayNet dataset by using parameters same as [official tutorial](https://colab.research.google.com/drive/16jcaJoc6bCFAQ96jDe2HwtXj7BMD_-m5#scrollTo=PIbAM2pv-urF)
+## Fine-tuning a model trained on FUNSD dataset by using parameters that are the same as the [official tutorial](https://colab.research.google.com/drive/16jcaJoc6bCFAQ96jDe2HwtXj7BMD_-m5#scrollTo=PIbAM2pv-urF)
 ```
 from detectron2.engine import DefaultTrainer
 from detectron2.config import get_cfg
@@ -164,7 +166,7 @@ I set the name "data_training_data" registered in DatasetCatalog.
 
 `file_path = "/content/drive/My Drive/dataset/configs/model_final_trimmed.pth"  
 `
-This is file path to trained model.
+This is the file path to the trained model.
 
 `cfg.merge_from_list(['MODEL.WEIGHTS', file_path])`
 I set model weights.
@@ -199,8 +201,8 @@ I set the fine tuned model.
 
 <img src="images/FUNSD/defaultpara_result.jpg" width=400>      
 
-This model can't detect any object, when `cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.6`.
-##  Evaluate its performance using AP metric implemented in COCO API
+This model can't detect any object when `cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.6`.
+##  Evaluate the model performance using AP metric implemented in COCO API
 ```
 from detectron2.evaluation import COCOEvaluator, inference_on_dataset
 from detectron2.data import build_detection_test_loader
@@ -209,12 +211,12 @@ val_loader = build_detection_test_loader(cfg, "balloon_val")
 inference_on_dataset(trainer.model, val_loader, evaluator)
 # another equivalent way is to use trainer.test
 ```
-AP50's score was the best.
-[reference of AP score](https://medium.com/@jonathan_hui/map-mean-average-precision-for-object-detection-45c121a31173)
+AP50's score was the highest.
+[Reference of AP score here](https://medium.com/@jonathan_hui/map-mean-average-precision-for-object-detection-45c121a31173)
 
 <img src="images/FUNSD/model_accuracy1.png" width=400>
 
-## Set best parameters by using optuna
+## Setting of the best parameters by using optuna
 
 ```
 def objective(trial):
@@ -253,23 +255,24 @@ def objective(trial):
   result = inference_on_dataset(trainer.model, val_loader, evaluator)
   return result['segm']['AP50']
 ```
-I searched learning_rate, max_iter, batch_size's good parameters.
-The function which trains and evaluates the model and return AP50.
+I searched for the best parameters for learning_rate, max_iter, batch_size.
+The above function returns the AP50 of the model.
 
 ```
 study = optuna.create_study(direction = 'maximize')
 study.optimize(objective, n_trials=20)
 study.best_params
 ```
-optuna searched the best parameters by executing the objective function for 20 times. If you change n_traials parameter to 40, optuna will search it 40 times.
-I got the best parameter.   
-learning_rate': 0.013427825040728855  
-max_iter': 382  
-batch_size': 273    
-The score(AP50) is 49.951153610757935.
+Optuna executed the above function 20 times and found the best parameters (below).
+* learning_rate': 0.013427825040728855  
+* max_iter': 382  
+* batch_size': 273    
+* The score(AP50) is 49.951153610757935.
 
-In addition, I visualize what parameters is best at learning_rate, max_iter, batch_size.
-The blow example code is for learning_rate.
+If you change n_traials to 40, optuna will run 40 times to find the best parameter.
+
+In addition, I showed which parameters are best at learning_rate, max_iter, batch_size.
+The example code below is for learning_rate.
 ```
 import matplotlib.pyplot as plt
 from operator import itemgetter
@@ -291,7 +294,7 @@ plt.show()
 
 <img src="images/FUNSD/optuna_learning_rate.png" width=400>      
 
-0.1 ~ 0.2 learning rate is good, beause values(AP50) is high.   
+0.1 ~ 0.2 learning rate is good, because values(AP50) are high.   
 
 ```
 lists = list(zip(max_iter, values))
@@ -306,7 +309,7 @@ plt.show()
 
 <img src="images/FUNSD/optuna_max_iter.png" width=400>    
 
-400 ~ 450 learning rate is good, beause values(AP50) is high.
+400 ~ 450 max_iter is good, because values(AP50) are high.
 
 ```
 lists = list(zip(batch_size, values))
@@ -321,12 +324,12 @@ plt.show()
 
 <img src="images/FUNSD/optuna_batch_size.png" width=400>  
 
-Ther is the small diferrence between batch_sizes, so batch_size might not  have a great effect for AP50.
-If you want to understand optuna more, check [this](https://optuna.readthedocs.io/en/latest/tutorial/first.html)
+There is a small difference in batch_sizes, so batch_size might not have a great effect for AP50.
+To understand optuna more, check [here](https://optuna.readthedocs.io/en/latest/tutorial/first.html).
 
 
 ## Confirm the performance after optimization
-I fine tune agin by using the best parameters.
+I fine tune again by using the best parameters.
 
 ```
 from detectron2.engine import DefaultTrainer
@@ -353,7 +356,7 @@ trainer.resume_or_load(resume=False)
 trainer.train()
 ```
 
-Inference & evaluation using the trained model
+Inference & evaluation using the trained model:
 ```
 cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.6   # set the testing threshold for this model
@@ -383,4 +386,4 @@ for d in random.sample(dataset_dicts, 3):
 ```
 <img src="images/FUNSD/bestparam_result.jpg" width=400>  
 
-The model was improved and can detect question and answer label with hight prediction scores.
+The model was improved and can detect question and answer labels with high prediction scores.
